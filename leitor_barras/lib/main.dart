@@ -28,7 +28,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _lerCodigoBarras() async {
     try {
-      var lerCodigo = await FlutterBarcodeScanner.scanBarcode("Red", "Cancelar", true, ScanMode.DEFAULT);
+      var lerCodigo = await FlutterBarcodeScanner.scanBarcode("Red", "Cancelar", true, ScanMode.BARCODE);
       setState(() {
         _codigo = lerCodigo;
       });
