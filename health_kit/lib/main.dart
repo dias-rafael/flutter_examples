@@ -35,6 +35,7 @@ class _MyAppState extends State<MyApp> {
       print("is WEIGHT data type available?: $weightAvailable");
 
       /// Specify the wished data types
+      /*
       List<HealthDataType> types = [
         HealthDataType.ACTIVE_ENERGY_BURNED,
         HealthDataType.BASAL_ENERGY_BURNED,
@@ -51,11 +52,21 @@ class _MyAppState extends State<MyApp> {
         HealthDataType.WAIST_CIRCUMFERENCE,
         HealthDataType.WEIGHT
       ];
+      */
+
+      List<HealthDataType> types = [
+        HealthDataType.HEIGHT,
+        HealthDataType.STEPS,
+        HealthDataType.WEIGHT,
+      ];
 
       for (HealthDataType type in types) {
         /// Calls must be wrapped in a try catch block
         try {
           /// Fetch new data
+          /// 
+          //HealthDataType type = HealthDataType.STEPS;// .BODY_MASS_INDEX;
+
           List<HealthDataPoint> healthData =
               await Health.getHealthDataFromType(startDate, endDate, type);
 
