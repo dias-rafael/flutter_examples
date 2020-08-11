@@ -75,6 +75,7 @@ class _MyAppState extends State<MyApp> {
 
           /// Filter out duplicates based on their UUID
           _healthDataList = Health.removeDuplicates(_healthDataList);
+          _healthDataList.sort((b, a) => a.dateTo.compareTo(b.dateTo));
         } catch (exception) {
           print(exception.toString());
         }
