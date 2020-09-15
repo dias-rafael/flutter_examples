@@ -1,8 +1,7 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:reorderables/reorderables.dart';
-import 'package:reorderables_widget/models/home_widgets/widgets_data_wrapper_model.dart';
-import 'package:reorderables_widget/nested_wrap_example.dart';
+import 'package:reorderables_widget/models/home_widgets/widgets_info_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() => runApp(
@@ -27,16 +26,20 @@ class _PageState extends State<Page> {
 
   SharedPreferences prefs;
 
-  List<WidgetsDataWrapperModel> models;  
+  List<WidgetsInfoModel> models;  
 
   @override
   void initState() {
     super.initState();
     models = [
-      WidgetsDataWrapperModel(index: 0, title: 'GROUP0', color: Colors.black),//Colors.grey[50]),      
-      WidgetsDataWrapperModel(index: 1, title: 'GROUP1', color: Colors.black),//Colors.grey[600]),   
-      WidgetsDataWrapperModel(index: 2, title: 'GROUP2', color: Colors.black),//Colors.grey[50]),   
-      WidgetsDataWrapperModel(index: 3, title: 'GROUP3', color: Colors.black),//Colors.grey[600]),   
+      WidgetsInfoModel(index: 0, order: 0, title: '00', subtitle: 'GLICOSE DAY', widthFactor: 3, height: 100),      
+      WidgetsInfoModel(index: 1, order: 0, title: '30', subtitle: 'GLICOSE WEEK', widthFactor: 1.5, height: 100),      
+      WidgetsInfoModel(index: 2, order: 1, title: '100', subtitle: 'GLICOSE MONTH', widthFactor: 1, height: 100),          
+      WidgetsInfoModel(index: 3, order: 2, title: '00', subtitle: 'GLICOSE DAY', widthFactor: 2, height: 50),      
+      WidgetsInfoModel(index: 4, order: 2, title: '30', subtitle: 'GLICOSE WEEK', widthFactor: 2, height: 50),           
+      WidgetsInfoModel(index: 5, order: 3, title: '400', subtitle: 'GLICOSE MONTH', widthFactor: 3, height: 50),         
+      WidgetsInfoModel(index: 6, order: 3, title: '500', subtitle: 'GLICOSE MONTH', widthFactor: 3, height: 50),         
+      WidgetsInfoModel(index: 7, order: 3, title: '600', subtitle: 'GLICOSE MONTH', widthFactor: 3, height: 50), 
     ];    
     _color = Colors.black;
     config();
@@ -48,12 +51,12 @@ class _PageState extends State<Page> {
       prefs = pref;
       List<String> lst = pref.getStringList('indexList');
 
-      List<WidgetsDataWrapperModel> list = [];
+      List<WidgetsInfoModel> list = [];
       if (lst != null && lst.isNotEmpty) {
         list = lst
             .map(
               (String indx) => models
-                  .where((WidgetsDataWrapperModel item) => int.parse(indx) == item.index)
+                  .where((WidgetsInfoModel item) => int.parse(indx) == item.index)
                   .first,
             )
             .toList();
@@ -64,7 +67,7 @@ class _PageState extends State<Page> {
   }
 
   void _onReorder(int oldIndex, int newIndex) async {
-    WidgetsDataWrapperModel row = models.removeAt(oldIndex);
+    WidgetsInfoModel row = models.removeAt(oldIndex);
     print(row);
     models.insert(newIndex, row);
     print(newIndex);
@@ -80,13 +83,22 @@ class _PageState extends State<Page> {
     final groups = <Widget>[];
     for (var i = 0; i < models.length; i++) {
       groups.add(
-        NestedWrapExample(order: models[i].index, color: models[i].color, title: models[i].title),
+        Container(
+          child: MyCard(
+              model: models[i],
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (BuildContext context) => FakePage(model: models[i]),
+                ),
+              ),
+            ),
+          )
       );
     }
 
     var wrap = ReorderableWrap(
       spacing: 0.0,
-      runSpacing: 0.0,
+      runSpacing: 10.0,
       //padding: const EdgeInsets.all(4),
       children: groups,
       onReorder: _onReorder,
@@ -106,7 +118,16 @@ class _PageState extends State<Page> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
-          height: 50,
+          height: 40,
+        ),
+        Container(
+          margin: EdgeInsets.only(bottom: 50, left: 20.0, right: 20.0),
+          width: 135,
+          //height: 45,
+          child: Image(
+            image: AssetImage("assets/ui/logo.png"),
+            fit: BoxFit.contain,
+          ),        
         ),
         Container(
           child: AutoSizeText(
@@ -120,10 +141,13 @@ class _PageState extends State<Page> {
               fontWeight: FontWeight.bold,
             ),
           )
-        ),      
-        wrap,
+        ),    
         Container(
           height: 20,
+        ),           
+        wrap,
+        Container(
+          height: 30,
         ),        
         Container(
           child: AutoSizeText(
@@ -137,7 +161,14 @@ class _PageState extends State<Page> {
               fontWeight: FontWeight.bold,
             ),
           )
-        ),         
+        ),   
+        Container(
+          height: 30,
+        ),
+        Icon(Icons.add, color: Colors.white),
+        Container(
+          height: 30,
+        ),        
       ]
     );
 
@@ -150,6 +181,143 @@ class _PageState extends State<Page> {
         child: Container(
           alignment: Alignment.center,
           child: column, 
+        ),
+      ),
+    );
+  }
+}
+
+// ------------------------ MyCard ----------------------------
+class MyCard extends StatelessWidget {
+  final WidgetsInfoModel model;
+  final void Function() onTap;
+  final int totalCards;
+
+  const MyCard({Key key, this.onTap, @required this.model, this.totalCards})
+      : assert(model != null),
+        super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width-20;
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 8.0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        child: _child(width),
+      ),
+    );
+  }
+
+  Widget _child(double width) {
+    return Container(
+      //width: (totalCards > 1) ? ((width - ((totalCards-1) * 10))/model.widthFactor) : width/model.widthFactor,
+      width: width/model.widthFactor - 8,
+      height: model.height,
+      //margin: EdgeInsets.all(5.0),
+      child: Column(
+       // mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          /*
+          Expanded(
+            flex: 5,
+            child: Padding(
+              padding: EdgeInsets.all(8.0),
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: model.icon,
+              ),
+            ),
+          ),         
+          */ 
+          (model.title != null) ? Expanded(
+            flex: 3,
+            child: Row(
+              //mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  child: AutoSizeText(
+                    model.title,
+                    maxLines: 1,
+                    minFontSize: 20,
+                    maxFontSize: 30,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.orange[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                ),
+              ],
+            ),
+          ) : Container(),
+          (model.subtitle != null) ? Expanded(
+            flex: 3,
+            child: Row(
+              //mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Expanded(
+                  child: AutoSizeText(
+                    model.subtitle,
+                    maxLines: 1,
+                    minFontSize: 12,
+                    maxFontSize: 14,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.orange[600],
+                      fontWeight: FontWeight.w500,
+                    ),
+                    //overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ) : Container(),          
+        ],
+      ),
+    );
+  }
+}
+
+
+// ----------------------- FAKE PAGE ---------------------------
+class FakePage extends StatelessWidget {
+  final WidgetsInfoModel model;
+  const FakePage({Key key, this.model}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.deepOrangeAccent,
+      ),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Text(
+              'You Clicked on Card : ${model.title}',
+              style: TextStyle(fontSize: 20.0),
+            ),
+            /*
+            Padding(
+              padding: EdgeInsets.only(top: 24.0),
+              child: Icon(
+                model.icon.icon,
+                size: 70.0,
+              ),
+            ),
+            */
+          ],
         ),
       ),
     );

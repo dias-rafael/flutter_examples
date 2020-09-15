@@ -62,14 +62,14 @@ class _MyHomePageState extends State<MyHomePage> {
     ),
     Container(height: 100, width: 100, color: Colors.blue),
     Container(height: 90, width: 90, color: Colors.purple),
-    Container(height: 90, width: 90, color: Colors.blueGrey),
+    Container(height: 120, width: 90, color: Colors.blueGrey),
     Container(height: 90, width: 90, color: Colors.brown),
-    Container(height: 90, width: 90, color: Colors.orange),
+    Container(height: 90, width: 150, color: Colors.orange),
     Container(height: 90, width: 90, color: Colors.lime),
     Container(height: 90, width: 90, color: Colors.lightGreen),
-    Container(height: 90, width: 90, color: Colors.pink),
+    Container(height: 40, width: 90, color: Colors.pink),
     Container(height: 90, width: 90, color: Colors.lightGreenAccent),
-    Container(height: 90, width: 90, color: Colors.yellow),
+    Container(height: 90, width: 30, color: Colors.yellow),
   ];
   List<int> _indexList;
 
@@ -89,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
         children: <Widget>[
           ReorderWrap(
             itemHeight: 90,
-            itemWidth: 90,
+            itemWidth: MediaQuery.of(context).size.width/2,
             children: _icons,
             reorderCallback: (newIndexList, oldIndex, newIndex){
               setState(() {

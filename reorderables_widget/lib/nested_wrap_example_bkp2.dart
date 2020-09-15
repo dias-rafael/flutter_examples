@@ -37,12 +37,10 @@ class _NestedWrapExampleState extends State<NestedWrapExample> {
       WidgetsInfoModel(index: 1, order: 0, title: '30', subtitle: 'GLICOSE WEEK', widthFactor: 1.5, height: 100),      
       WidgetsInfoModel(index: 2, order: 1, title: '100', subtitle: 'GLICOSE MONTH', widthFactor: 1, height: 100),          
       WidgetsInfoModel(index: 3, order: 2, title: '00', subtitle: 'GLICOSE DAY', widthFactor: 2, height: 50),      
-      WidgetsInfoModel(index: 4, order: 2, title: '30', subtitle: 'GLICOSE WEEK', widthFactor: 2, height: 50),     
-      /* 
-      WidgetsInfoModel(index: 0, order: 3, title: '100', subtitle: 'GLICOSE MONTH', widthFactor: 1, height: 50),         
-      WidgetsInfoModel(index: 0, order: 4, title: '400', subtitle: 'GLICOSE MONTH', widthFactor: 3, height: 50),         
-      WidgetsInfoModel(index: 1, order: 4, title: '500', subtitle: 'GLICOSE MONTH', widthFactor: 3, height: 50),         
-      WidgetsInfoModel(index: 2, order: 4, title: '600', subtitle: 'GLICOSE MONTH', widthFactor: 3, height: 50),     */    
+      WidgetsInfoModel(index: 4, order: 2, title: '30', subtitle: 'GLICOSE WEEK', widthFactor: 2, height: 50),           
+      WidgetsInfoModel(index: 5, order: 3, title: '400', subtitle: 'GLICOSE MONTH', widthFactor: 3, height: 50),         
+      WidgetsInfoModel(index: 6, order: 3, title: '500', subtitle: 'GLICOSE MONTH', widthFactor: 3, height: 50),         
+      WidgetsInfoModel(index: 7, order: 3, title: '600', subtitle: 'GLICOSE MONTH', widthFactor: 3, height: 50), 
     ];
     config();
     super.initState();
@@ -121,7 +119,7 @@ class _NestedWrapExampleState extends State<NestedWrapExample> {
             children: <Widget>[
               ReorderableWrap(
                 //spacing: (totalCards > 1) ? 5.0 : 0.0,
-                key: Key(widget.order.toString()),
+                key: ValueKey(widget.order.toString()),
                 runSpacing: 0,
                 maxMainAxisCount: 5,
                 minMainAxisCount: 3,
@@ -205,12 +203,12 @@ class _NestedWrapExampleState extends State<NestedWrapExample> {
                 onNoReorder: (int index) {
                   //this callback is optional
                   debugPrint('${DateTime.now().toString().substring(5, 22)} ' +
-                      'reorder cancelled. index:$index');
+                      'reorder cancelled. index:$index' + widget.key.toString());
                 },
                 onReorderStarted: (int index) {
                   //this callback is optional
                   debugPrint('${DateTime.now().toString().substring(5, 22)} ' +
-                      'reorder started: index:$index');
+                      'reorder started: index:$index' + widget.key.toString());
                 }
               )
             ]
