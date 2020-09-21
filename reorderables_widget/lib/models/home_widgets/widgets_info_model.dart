@@ -7,9 +7,9 @@ class WidgetsInfoModel {
   String subtitle;
   Icon icon;
   double widthFactor;
-  double height;
+  double heightFactor;
 
-  WidgetsInfoModel({this.index, this.order, this.title, this.subtitle, this.icon, this.widthFactor, this.height});
+  WidgetsInfoModel({this.index, this.order, this.title, this.subtitle, this.icon, this.widthFactor, this.heightFactor});
 
   @override
   String toString() {
