@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package sensor_server;
+
+service Sensor {
+  rpc Store (StoreEntryRequest) returns (SensorInfo) {}
+}
+
+message SensorInfo {
+  string id = 1;
+  string last_entry_value = 2;
+}
+
+message StoreEntryRequest {
+  string sensor_id = 1;
+  string value = 2;
+}
