@@ -9,5 +9,6 @@ class SendLocation {
     _store.sensorId = "teste";
     _store.value = "var";
     return await client.store(_store);
+    //await GrpcClientSingleton().client.shutdown();
   }
 }
