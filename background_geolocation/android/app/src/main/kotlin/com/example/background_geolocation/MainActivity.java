@@ -1,5 +1,6 @@
 package com.example.background_geolocation;
 
+import android.app.Application;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -7,7 +8,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Build;
 import android.os.IBinder;
-import android.telephony.ServiceState;
 import android.util.Log;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -17,6 +17,8 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 
 import static android.content.ContentValues.TAG;
+import static com.example.background_geolocation.ServiceTrackerKt.getServiceState;
+import static com.example.background_geolocation.Utils.log;
 
 public class MainActivity extends FlutterActivity {
 
@@ -74,7 +76,20 @@ public class MainActivity extends FlutterActivity {
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (intent.getAction() == Intent.ACTION_BOOT_COMPLETED && getServiceState(context) == ServiceState.STARTED) {
+                //new Intent(context, LocationUpdatesService.class).also; {
+                new Intent(context, LocationUpdatesService.class).setAction(Actions.START.name());
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        log("Starting the service in >=26 Mode from a BroadcastReceiver");
+                        context.startForegroundService(new Intent(context, LocationUpdatesService.class));
+                        return;
+                    }
+                    log("Starting the service in < 26 Mode from a BroadcastReceiver");
+                    context.startService(new Intent(context, LocationUpdatesService.class));
+                //}
+            }
 
+/*
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         Log.i(TAG, "Starting the service in >=26 Mode from a BroadcastReceiver");
                         context.startForegroundService(new Intent(context, LocationUpdatesService.class));
@@ -82,9 +97,7 @@ public class MainActivity extends FlutterActivity {
                     }
                     Log.i(TAG, "Starting the service in < 26 Mode from a BroadcastReceiver");
                     context.startService(new Intent(context, LocationUpdatesService.class));
-
-
-            //startForegroundService(new Intent(applicationContext, LocationUpdatesService.class));
+          */
             //TODO: Implementar codigo para receber a latitude e longitute quando estiver em foreground.
         }
     }

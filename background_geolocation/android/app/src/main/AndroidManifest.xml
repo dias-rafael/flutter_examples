@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name="io.flutter.app.FlutterApplication"
@@ -46,18 +47,15 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <receiver android:enabled="true" android:name=".MainActivity$MyReceiver">
+        <receiver android:enabled="true" android:name=".StartReceiver">
             <intent-filter>
-                <category android:name="android.intent.category.DEFAULT" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
         <service
             android:name=".LocationUpdatesService"
             android:enabled="true"
-            android:exported="true"
-            android:foregroundServiceType="location"
+            android:exported="false"
             android:stopWithTask="false" />
 
         <!-- Don't delete the meta-data below.

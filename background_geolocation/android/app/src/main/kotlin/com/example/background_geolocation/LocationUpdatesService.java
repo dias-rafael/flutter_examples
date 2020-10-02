@@ -1,5 +1,6 @@
 package com.example.background_geolocation;
 
+import android.annotation.TargetApi;
 import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -16,8 +17,22 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import android.app.*;
+import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
+
+import android.os.PowerManager;
+import android.os.SystemClock;
+import android.provider.Settings;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+import kotlinx.coroutines.*;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -35,6 +50,9 @@ import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodChannel;
 
+import static com.example.background_geolocation.ServiceTrackerKt.setServiceState;
+import static com.example.background_geolocation.Utils.log;
+
 /**
  * A bound and started service that is promoted to a foreground service when location updates have
  * been requested and all clients unbind.
@@ -50,6 +68,90 @@ import io.flutter.plugin.common.MethodChannel;
  * notification assocaited with that service is removed.
  */
 public class LocationUpdatesService extends Service {
+    private PowerManager.WakeLock wakeLock = null;
+    private boolean isServiceStarted = false;
+
+    private final IBinder mBinder = new LocalBinder();
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        // Called when a client (MainActivity in case of this sample) comes to the foreground
+        // and binds with this service. The service should cease to be a foreground service
+        // when that happens.
+        Log.i(TAG, "in onBind()");
+        mChangingConfiguration = false;
+        return mBinder;
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(TAG, "Service started");
+        Toast.makeText(this, "LocationService", Toast.LENGTH_LONG).show();
+        boolean startedFromNotification = intent.getBooleanExtra(EXTRA_STARTED_FROM_NOTIFICATION,
+                false);
+
+        context = getApplicationContext();
+
+        flutterEngine = new FlutterEngine(this);
+        flutterEngine.getNavigationChannel().setInitialRoute("/callback");
+        flutterEngine.getDartExecutor().executeDartEntrypoint(DartExecutor.DartEntrypoint.createDefault());
+        flutterEngine.getPlugins().add(new io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin());
+
+        channel = new MethodChannel(flutterEngine.getDartExecutor(), "geolocation_plugin");
+
+        // We got here because the user decided to remove location updates from the notification.
+        if (startedFromNotification) {
+            removeLocationUpdates();
+            stopSelf();
+        }
+
+        return START_STICKY;
+    }
+
+    @TargetApi(Build.VERSION_CODES.ECLAIR)
+    @Override
+    public void onCreate() {
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        mLocationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+                onNewLocation(locationResult.getLastLocation());
+            }
+        };
+
+        createLocationRequest();
+        getLastLocation();
+
+        HandlerThread handlerThread = new HandlerThread(TAG);
+        handlerThread.start();
+        mServiceHandler = new Handler(handlerThread.getLooper());
+        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        // Android O requires a Notification Channel.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "Flutter background geolocation";
+            // Create the channel for the notification
+            NotificationChannel mChannel =
+                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+
+            // Set the Notification Channel for the Notification Manager.
+            mNotificationManager.createNotificationChannel(mChannel);
+        }
+
+        startForeground(NOTIFICATION_ID, getNotification());
+    }
+
+    @Override
+    public void onDestroy() {
+        if (flutterEngine != null) {
+            flutterEngine.destroy();
+        }
+        mServiceHandler.removeCallbacksAndMessages(null);
+        log("The service has been destroyed".toUpperCase());
+        Toast.makeText(this, "Service destroyed", Toast.LENGTH_SHORT).show();
+    }
 
     Context context;
 
@@ -73,7 +175,7 @@ public class LocationUpdatesService extends Service {
     private static final String EXTRA_STARTED_FROM_NOTIFICATION = PACKAGE_NAME +
             ".started_from_notification";
 
-    private final IBinder mBinder = new LocalBinder();
+
 
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
@@ -126,62 +228,9 @@ public class LocationUpdatesService extends Service {
     public LocationUpdatesService() {
     }
 
-    @Override
-    public void onCreate() {
-        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        mLocationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                onNewLocation(locationResult.getLastLocation());
-            }
-        };
 
-        createLocationRequest();
-        getLastLocation();
 
-        HandlerThread handlerThread = new HandlerThread(TAG);
-        handlerThread.start();
-        mServiceHandler = new Handler(handlerThread.getLooper());
-        mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        // Android O requires a Notification Channel.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Flutter background geolocation";
-            // Create the channel for the notification
-            NotificationChannel mChannel =
-                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
-
-            // Set the Notification Channel for the Notification Manager.
-            mNotificationManager.createNotificationChannel(mChannel);
-        }
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(TAG, "Service started");
-        Toast.makeText(this, "LocationService", Toast.LENGTH_LONG).show();
-        boolean startedFromNotification = intent.getBooleanExtra(EXTRA_STARTED_FROM_NOTIFICATION,
-                false);
-
-        context = getApplicationContext();
-
-        flutterEngine = new FlutterEngine(this);
-        flutterEngine.getNavigationChannel().setInitialRoute("/callback");
-        flutterEngine.getDartExecutor().executeDartEntrypoint(DartExecutor.DartEntrypoint.createDefault());
-        flutterEngine.getPlugins().add(new io.flutter.plugins.sharedpreferences.SharedPreferencesPlugin());
-
-        channel = new MethodChannel(flutterEngine.getDartExecutor(), "geolocation_plugin");
-
-        // We got here because the user decided to remove location updates from the notification.
-        if (startedFromNotification) {
-            removeLocationUpdates();
-            stopSelf();
-        }
-        // Tells the system to not try to recreate the service after it has been killed.
-        return START_STICKY;
-    }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -189,16 +238,7 @@ public class LocationUpdatesService extends Service {
         mChangingConfiguration = true;
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        // Called when a client (MainActivity in case of this sample) comes to the foreground
-        // and binds with this service. The service should cease to be a foreground service
-        // when that happens.
-        Log.i(TAG, "in onBind()");
-        stopForeground(true);
-        mChangingConfiguration = false;
-        return mBinder;
-    }
+
 
     @Override
     public void onRebind(Intent intent) {
@@ -206,11 +246,12 @@ public class LocationUpdatesService extends Service {
         // and binds once again with this service. The service should cease to be a foreground
         // service when that happens.
         Log.i(TAG, "in onRebind()");
-        stopForeground(true);
-        mChangingConfiguration = false;
+        //stopForeground(true);
+        //mChangingConfiguration = false;
         super.onRebind(intent);
     }
 
+    @TargetApi(Build.VERSION_CODES.ECLAIR)
     @Override
     public boolean onUnbind(Intent intent) {
         Log.i(TAG, "Last client unbound from service");
@@ -221,18 +262,18 @@ public class LocationUpdatesService extends Service {
         if (!mChangingConfiguration && Utils.requestingLocationUpdates(this)) {
             Log.i(TAG, "Starting foreground service");
 
+            if (isServiceStarted) return true;
+            log("Starting the foreground service task");
+            Toast.makeText(this, "Service starting its task", Toast.LENGTH_SHORT).show();
+            isServiceStarted = true;
+            setServiceState(this, ServiceState.STARTED);
+
             startForeground(NOTIFICATION_ID, getNotification());
         }
         return true; // Ensures onRebind() is called when a client re-binds.
     }
 
-    @Override
-    public void onDestroy() {
-        if (flutterEngine != null) {
-            flutterEngine.destroy();
-        }
-        mServiceHandler.removeCallbacksAndMessages(null);
-    }
+
 
     /**
      * Makes a request for location updates. Note that in this sample we merely log the

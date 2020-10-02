@@ -5,6 +5,7 @@ import android.preference.PreferenceManager;
 
 import java.text.DateFormat;
 import java.util.Date;
+import android.util.Log;
 
 class Utils {
 
@@ -44,4 +45,9 @@ class Utils {
         return "Estamos obtendo sua localização: " +
                 DateFormat.getDateTimeInstance().format(new Date());
     }
+
+    static void log(String msg) {
+        Log.d("ENDLESS-SERVICE", msg);
+    }
+
 }
