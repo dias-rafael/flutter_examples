@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,8 +29,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const platform = const MethodChannel('samples.flutter.dev/battery');
+  @override
+  void initState() {
+    PermissionHandler().requestPermissions(
+        [PermissionGroup.location, PermissionGroup.locationAlways, PermissionGroup.locationWhenInUse]);
+  }
+
+  static const platform = const MethodChannel('backgroundServices');
   String _batteryLevel = 'Unknown battery level.';
+  String _geoLocation = 'Unknown location.';
 
   Future<void> _getBatteryLevel() async {
     String batteryLevel;
@@ -45,6 +53,20 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
+  Future<void> _getGeoLocation() async {
+    String geoLocation;
+    try {
+      final String result = await platform.invokeMethod('getGeoLocation');
+      geoLocation = 'Last Location: $result.';
+    } on PlatformException catch (e) {
+      geoLocation = "Failed to get location: '${e.message}'.";
+    }
+
+    setState(() {
+      _geoLocation = geoLocation;
+    });
+  }  
+
   @override
   Widget build(BuildContext context) {
     return Material(
@@ -57,6 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
               onPressed: _getBatteryLevel,
             ),
             Text(_batteryLevel),
+            RaisedButton(
+              child: Text('Get Location'),
+              onPressed: _getGeoLocation,
+            ),
+            Text(_geoLocation),            
           ],
         ),
       ),
