@@ -2,9 +2,15 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>application-identifier</key>
+	<string>45B84S9MJ4.com.example.homeWidgetsExample.TestWidget</string>
+	<key>com.apple.developer.team-identifier</key>
+	<string>45B84S9MJ4</string>
 	<key>com.apple.security.application-groups</key>
 	<array>
 		<string>group.YOUR_APP_GROUP_ID</string>
 	</array>
+	<key>get-task-allow</key>
+	<true/>
 </dict>
 </plist>
