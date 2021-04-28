@@ -1,0 +1,25 @@
+name: home_widget
+description: A plugin to provide a common interface for creating HomeScreen Widgets for Android and iOS.
+version: 0.1.2+1
+
+environment:
+  sdk: '>=2.12.0-0 <3.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  pedantic: ^1.10.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: es.antonborri.home_widget
+        pluginClass: HomeWidgetPlugin
+      ios:
+        pluginClass: HomeWidgetPlugin
