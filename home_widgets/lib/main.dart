@@ -176,7 +176,7 @@ class _MyAppState extends State<MyApp> {
             ),
             ElevatedButton(
               onPressed: _sendAndUpdate,
-              child: Text('Send Data to Widgets'),
+              child: Text('Send Data to Widget'),
             ),
             ElevatedButton(
               onPressed: _loadData,
