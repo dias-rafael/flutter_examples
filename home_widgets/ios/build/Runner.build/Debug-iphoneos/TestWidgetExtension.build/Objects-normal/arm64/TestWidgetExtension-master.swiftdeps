@@ -1,5 +1,0 @@
-version: "Apple Swift version 5.3.2 (swiftlang-1200.0.45 clang-1200.0.32.28)"
-options: "5335378950994434ebaea97717952829"
-build_time: [1619130661, 593406000]
-inputs:
-  "/Users/rafaeldias/Documents/flutter_examples/home_widgets/ios/TestWidget/TestWidget.swift": [1619130522, 50426479]
