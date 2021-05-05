@@ -177,8 +177,11 @@ class _HomePageState extends State<HomePage> {
           badge: true,
           sound: true,
         );
-    if (await Permission.notification.request().isGranted)
+    if (await Permission.notification.isGranted) {
         print("OK");
+    } else {
+        await Permission.notification.request();
+    }
     /*
     if (status.isGranted == true) {
     print("OK");

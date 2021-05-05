@@ -775,15 +775,22 @@ public class FlutterLocalNotificationsPlugin implements MethodCallHandler, Plugi
                 }
             } else {
                 Log.d("DND", "does not have permissions");
+                Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+                /*
                 int permissionNotifications = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_NOTIFICATION_POLICY);
                 if (permissionNotifications != PackageManager.PERMISSION_GRANTED ) {
-                    requestPermissions(
-                            (Activity) context,
-                            new String[] { Manifest.permission.ACCESS_NOTIFICATION_POLICY },
-                            123//PERMISSION_REQUEST
-                    );
+                    Log.d("DND", "requesting permission");
+                    Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
                 }
-                /*             
+                ActivityCompat.requestPermissions(
+                (Activity) context,
+                new String[] { Manifest.permission.ACCESS_NOTIFICATION_POLICY },
+                123)
+
                 Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
