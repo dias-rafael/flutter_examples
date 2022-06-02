@@ -10,15 +10,15 @@ extension on String {
 }
 
 class GithubDataSource implements SearchDatasource {
-  final Dio dio;
+  final Dio? dio;
 
   GithubDataSource(this.dio);
 
   @override
   Future<List<ResultSearchModel>?>? getSearch(String? searchText) async {
-    final response = await dio.get("https://api.github.com/search/users?q=${searchText ?? "".normalize()}");
-    if (response.statusCode == 200) {
-      final list = (response.data['items'] as List).map((e) => ResultSearchModel.fromMap(e)).toList();
+    final response = await dio?.get("https://api.github.com/search/users?q=${searchText ?? "".normalize()}");
+    if (response?.statusCode == 200) {
+      final list = (response?.data['items'] as List).map((e) => ResultSearchModel.fromMap(e)).toList();
       return list;
     } else {
       throw DataSourceError();

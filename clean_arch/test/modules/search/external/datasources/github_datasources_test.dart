@@ -4,26 +4,32 @@ import 'package:clean_arch/modules/search/domain/errors/errors.dart';
 import 'package:clean_arch/modules/search/external/datasources/github_datasource.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
 class DioMock extends Mock implements Dio {}
 
+@GenerateMocks([Dio])
 main() {
   final dio = DioMock();
 
   final datasource = GithubDataSource(dio);
 
   test('deve retornar response dio', () async {
-    when(dio.get(any)).thenAnswer((_) async => Response(data: jsonDecode(githubResult), statusCode: 200));
+    when(dio.get("https://api.github.com/search/users?q=rafael")).thenAnswer((_) async => Response(
+        data: jsonDecode(githubResult),
+        statusCode: 200,
+        requestOptions: RequestOptions(path: "https://api.github.com/search/users?q=")));
 
-    final future = datasource.getSearch("searchText") ?? "";
+    final future = datasource.getSearch("searchText");
     expect(future, completes);
   });
 
   test('deve retornar erro se diferente de 200', () async {
-    when(dio.get(any)).thenAnswer((_) async => Response(data: null, statusCode: 401));
+    when(dio.get("https://api.github.com/search/users?q=rafael")).thenAnswer((_) async => Response(
+        data: null, statusCode: 401, requestOptions: RequestOptions(path: "https://api.github.com/search/users?q=")));
 
-    final future = datasource.getSearch("searchText") ?? "";
+    final future = datasource.getSearch("searchText");
     expect(future, throwsA(isA<DataSourceError>()));
   });
 }
